@@ -1,6 +1,6 @@
 ## G-Tomo Sky Chart App
 
-This folder contains the code to construct a night sky plot using the GTOMO dataset. 
+This folder contains the code to construct a night sky plot using the G-Tomo dataset. 
 There exists both a online interactive version using dash and an offline version which uses the matplotlib library. For an overview of the code and its functions please refer to the `AboutCodeStructure.txt` file in the repository. 
 
 ## Requirements
