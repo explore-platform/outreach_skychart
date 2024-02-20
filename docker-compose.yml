@@ -1,0 +1,47 @@
+version: '3.3'
+
+services:
+
+  # ======================================
+  # -- PROXY
+  # The proxy is to simulate the EXPLORE's loadbalancing to a subpath
+  # ======================================
+  proxy:
+    image: 'traefik:2.4'
+    container_name: proxy_gtomo
+    ports:
+      - 8080:8080
+      - 8015:80
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    command:
+      - '--api.insecure=true'
+      - '--entryPoints.web.address=:80'
+      - '--providers.docker=true'
+      - '--serverstransport.insecureskipverify=true'
+      - '--api=true'
+      - '--api.debug=true'
+      - '--log.level=INFO'
+  app:
+    build:
+      context: ./
+      dockerfile: ./sda/_local/Dockerfile
+      # dockerfile: ./sda/_prod/Dockerfile
+    env_file:
+      - .env
+    # ports:
+    #   - 8050:8050
+    volumes:
+      - ./sda:/sda
+    labels:
+        traefik.enable: 'true'
+        
+        traefik.http.routers.sda.entrypoints: 'web'
+        traefik.http.routers.sda.rule: 'HostRegexp(`{host:.+}`) && PathPrefix(`/path_to_sda/`)'
+        
+        # If strip path is required
+        # traefik.http.routers.sda.middlewares: 'sda-strip-prefix'
+        # traefik.http.middlewares.sda-strip-prefix.stripprefix.prefixes: '/path_to_sda/'
+
+        traefik.http.services.sda.loadbalancer.server.scheme: 'http'
+        traefik.http.services.sda.loadbalancer.server.port: '8050'

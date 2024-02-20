@@ -1,0 +1,95 @@
+**Code explanation Night Sky Gtomo**
+This document serves as a brief outline of the code structure in this folder. It will shortly summarize the how the different files relate to each other and provide a top level explanation of functions that are used. 
+
+**Code execution** 
+Two versions of the code exist, (1) an offline version using the matplotlib library to create the plot and (2) an interactive online version using Plotly and Dash to create the plot. They use largely the same support code, except for two files. Below a brief overview of each version is found. 
+
+**Running the code**
+To execute the offline version only the 'Main.py' file needs to be ran.
+To execute the online version the 'DashApp.py' file needs to be ran and the local link should be opened in a browser of choice. 
+
+**Required libraries**
+The user must install the following python libraries to their environment:
+
+_Offline version (1)_
+Matplotlib
+Numpy
+Astropy
+
+_Online version (2)_
+Numpy 
+Astropy
+Plotly
+Dash
+Dash_bootstrap_components
+Dash_daq
+datetime
+
+**Overview of common support files**
+The 2 code version share 3 support files these are:
+1. dust_data_interpreter.py
+2. constellations_updated.py
+3. solar_system.py
+
+Below follows an overview of the functions in each file in order of execution by the main file.
+_1. integrated_dust_data.py_
+This file contains 2 functions that are used in the mainfile these are
+	a. getintegratedcoordinates(): a function which reads the data file and creates a table containing each data point's coordinates in the galactic frame and the corresponding integrated extinction in that direction.
+	   The columns names and corresponding units of the output are respectively 'l' [rad], 'b' [rad], 'data' [log10 mag]
+
+	b. to_altaz(data_table, obs_loc, obs_time):
+	   Where: 
+		data_table is the data table following from the getintegratedcoordinates() function
+		obs_loc is the selected position from the observer on Earth and should be a EarthLocation object from the Astropy library 
+		obs_time is the time of the observation, which should be a Astropy Time object
+	  The function then returns a similar table to the one created in the Dust class however with the coordinates transformed from l, b (galactic frame) to Alt Az coordinates in degrees as 
+	  seen from the observer on Earth. 
+
+_2. constellation_data.py_
+
+This file contains 1 function that is used by the main file.
+queryconstellation(obs_loc, obs_time): which is a function which reads the ConstellationLines.dat file, which contain information on the 88 IAU western sky constellations.  
+
+The inputs of the function are:
+obs_loc = Astropy EarthLocation of observer 
+obs_time = Astropy Time stamp of observer
+
+It returns 3 elements: 
+querytable: list of all alt az coordinates of the stars present in the constellations
+splitting indices: table containing first and last star of each constellation to allow the plotter to distinguish where to finish and start drawing each constellation's lines.
+names: list of all constellation acronyms
+
+_3. solarsystem.py_
+This file contains 1 function that is used by the main file
+get_solarsystem(obs_loc, obs_time): which calls the position of the planets in our solar system, the sun and the moon, in alt az coordinates. 
+It also assigns each body a colour and markersize that is used when plotting. It returns a AstroPy Qtable containing all the information. 
+The columns are respectively called ['body','az','alt','color','size'] where body is the name of the body used to add a label in the plot.
+
+The inputs are again:
+obs_loc = Astropy EarthLocation of observer 
+obs_time = Astropy Time stamp of observer
+
+
+
+**Overview different support files**
+_Offline version_
+plotter.py
+
+This file contains 1 function that is used by the main file 
+
+def create_plot(dust_data, solarsystem, constellations, constellationinfo, consname): this function constructs the polar plot which displays all the data in a plot of the night sky. 
+Where:
+dust_data = result of the datafilter function
+solarsystem = result of get_solarsystem function 
+constellations, constellationinfo, consname = results of the queryconstellation function 	
+
+_Online version_
+PlotlyPlotter.py
+This file contains 1 function that is used by the main file
+def create_plotly(dust_data, solarsystem, constellations, constellationinfo, consname)
+It does the same as the offline version and uses the same inputs, but then generates the plot in the Plotly library
+
+
+
+**Other**
+Finally there is also a timelapse.py file which creates saves a lot of consecutive plots chronologically to allow for the creation of a timelapse of the data. 
